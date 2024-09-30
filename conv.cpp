@@ -49,6 +49,37 @@ Channels conv_multi_channel(const Channels& input_channels, const Filters& filte
                 }
             }
 
+<<<<<<< HEAD
+=======
+            // vector<double> outputArray(oRows * oCols);
+            // for (int i = 0; i< oRows*oCols; ++i){
+            //     double sum = 0.0;
+            //     for (int fi = 0 ; fi < fRows*fCols; ++fi){
+            //         sum += inputArray[((int (fi/fCols)+ int(i/oCols))*iCols)+(fi%fCols)+(i%oCols)]* filterArray[fi];
+            //     }
+            //     outputArray[i] += sum;
+            // }
+
+            // for (int i = 0; i< oRows*oCols; ++i){
+            //     outputs[f][int(i/oCols)][i%oCols] = outputArray[i];
+            // }
+
+
+            
+
+            // Convolution operation => 1 input channel * 1 filter channel
+            // for (int i = 0; i < oRows; ++i) {
+            //     for (int j = 0; j < oCols; ++j) {
+            //         double sum = 0.0;
+            //         for (int fi = 0; fi < fRows; ++fi) {
+            //             for (int fj = 0; fj < fCols; ++fj) {
+            //                 sum += input_channels[c][i + fi][j + fj] * filters[f][c][fi][fj];
+            //             }
+            //         }
+            //         outputs[f][i][j] += sum;
+            //     }
+            // }
+>>>>>>> 3f56b0aa5c43c16e44fe35605804708db6d4c03a
         }
     }
     return outputs;
@@ -98,4 +129,8 @@ int main() {
 
 
     return 0;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 3f56b0aa5c43c16e44fe35605804708db6d4c03a
