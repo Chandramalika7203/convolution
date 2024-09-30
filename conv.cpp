@@ -7,79 +7,51 @@ using Channels = vector<Matrix>; // list of channels => filter or output
 using Filters = vector<Channels>; // list of filters
 
 // Function to perform convolution across multiple channels and filters
-Channels conv_multi_channel(const Channels& input_channels, const Filters& filters) {
+Channels conv_multi_channel(const Channels& input_channels, const Filters& filters, int stride, int pad) {
     Channels outputs(filters.size());
+    int paddedRows = input_channels[0].size() + 2 * pad;// no. of rows in input channel +2*pad
+    int paddedCols = input_channels[0][0].size() + 2 * pad;//no. of cols in inp channel +2*pad
+
     for (int f = 0; f < filters.size(); ++f) { // for each filter
         // Initialize output matrix for this filter with zeros
-        int oRows = input_channels[0].size() - filters[f][0].size() + 1;
-        int oCols = input_channels[0][0].size() - filters[f][0][0].size() + 1;
+        int oRows = (paddedRows - filters[f][0].size()) / stride + 1;
+        int oCols = (paddedCols- filters[f][0][0].size()) / stride + 1;
         outputs[f] = Matrix(oRows, vector<double>(oCols, 0.0));
 
         // Convolution operation on input channels and corresponding filter channels
-        for (int c = 0; c < input_channels.size(); ++c) {
-            int iRows = input_channels[c].size();
-            int iCols = input_channels[c][0].size();
-            int fRows = filters[f][c].size();
-            int fCols = filters[f][c][0].size();
-
-            vector<double> inputArray(iRows * iCols);
-            vector<double> filterArray(fRows * fCols);
-
-            for (int i = 0; i < iRows; ++i) {
-                for (int j = 0; j < iCols; ++j) {
-                    inputArray[i * iCols + j] = input_channels[c][i][j];
-                }
-            }
-
-            for (int fi = 0; fi < fRows; ++fi) {
-                for (int fj = 0; fj < fCols; ++fj) {
-                    filterArray[fi * fCols + fj] = filters[f][c][fi][fj];
-                }
-            }
-            
+        
             for (int i = 0; i < oRows; ++i) {
                 for (int j = 0; j < oCols; ++j) {
                     double sum = 0.0;
-                    for (int fi = 0; fi < fRows; ++fi) {
-                        for (int fj = 0; fj < fCols; ++fj) {
-                            sum += inputArray[(i + fi) * iCols + (j + fj)] * filterArray[fi * fCols + fj];
+                    for (int c = 0; c < input_channels.size(); ++c) {
+                        int iRows = paddedRows;
+                        int iCols = paddedCols;
+                        int fRows = filters[f][c].size();
+                        int fCols = filters[f][c][0].size();
+
+                        vector<double> inputArray(iRows * iCols, 0.0);
+                        vector<double> filterArray(fRows * fCols);
+
+                        for (int i = 0; i < input_channels[c].size(); ++i) {
+                            for (int j = 0; j < input_channels[c][0].size(); ++j) {
+                                inputArray[(pad+i) * iCols + j+pad] = input_channels[c][i][j];
+                            }
                         }
-                    }
-                    outputs[f][i][j] += sum;
+
+                        for (int fi = 0; fi < fRows; ++fi) {
+                            for (int fj = 0; fj < fCols; ++fj) {
+                                filterArray[fi * fCols + fj] = filters[f][c][fi][fj];
+                            }
+                        }
+                        
+                        for (int fi = 0; fi < fRows; ++fi) {
+                            for (int fj = 0; fj < fCols; ++fj) {
+                                sum += inputArray[(i* stride + fi) * iCols + (j*stride + fj)] * filterArray[fi * fCols + fj];
+                            }
+                        }
+                    outputs[f][i][j] = sum;
                 }
             }
-
-<<<<<<< HEAD
-=======
-            // vector<double> outputArray(oRows * oCols);
-            // for (int i = 0; i< oRows*oCols; ++i){
-            //     double sum = 0.0;
-            //     for (int fi = 0 ; fi < fRows*fCols; ++fi){
-            //         sum += inputArray[((int (fi/fCols)+ int(i/oCols))*iCols)+(fi%fCols)+(i%oCols)]* filterArray[fi];
-            //     }
-            //     outputArray[i] += sum;
-            // }
-
-            // for (int i = 0; i< oRows*oCols; ++i){
-            //     outputs[f][int(i/oCols)][i%oCols] = outputArray[i];
-            // }
-
-
-            
-
-            // Convolution operation => 1 input channel * 1 filter channel
-            // for (int i = 0; i < oRows; ++i) {
-            //     for (int j = 0; j < oCols; ++j) {
-            //         double sum = 0.0;
-            //         for (int fi = 0; fi < fRows; ++fi) {
-            //             for (int fj = 0; fj < fCols; ++fj) {
-            //                 sum += input_channels[c][i + fi][j + fj] * filters[f][c][fi][fj];
-            //             }
-            //         }
-            //         outputs[f][i][j] += sum;
-            //     }
-            // }
->>>>>>> 3f56b0aa5c43c16e44fe35605804708db6d4c03a
         }
     }
     return outputs;
@@ -114,7 +86,10 @@ int main() {
          {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}}}
     };
 
-    Channels output = conv_multi_channel(input_channels, filters);
+    int stride = 2;
+    int pad = 1;
+
+    Channels output = conv_multi_channel(input_channels, filters,stride,pad);
     cout << "Output: " << endl;
     for (int f = 0; f < output.size(); ++f) {
         cout << "Feature Map " << f + 1 << ":" << endl;
@@ -129,8 +104,4 @@ int main() {
 
 
     return 0;
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 3f56b0aa5c43c16e44fe35605804708db6d4c03a
